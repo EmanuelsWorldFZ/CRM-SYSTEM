@@ -12,7 +12,7 @@ grouped with their blueprint. Pytest exercises the app through its test client.
 
 ```text
 crm/
-  auth/          Registration and, in a later feature, login/logout
+  auth/          Registration and login/logout
   models/        SQLAlchemy entities
   templates/     Shared and blueprint-specific Jinja templates
   __init__.py    Application factory and CLI commands
@@ -39,8 +39,8 @@ the remaining entities arrive with their respective features.
 
 ## Development roadmap
 
-1. User registration with validated input, password hashing, and tests.
-2. Login/logout and authenticated session handling.
+1. User registration with validated input, password hashing, and tests (complete).
+2. Login/logout and authenticated session handling (complete).
 3. Dashboard.
 4. Client CRUD and ownership enforcement.
 5. Client notes.

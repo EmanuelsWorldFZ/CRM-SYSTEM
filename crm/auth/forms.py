@@ -29,3 +29,16 @@ class RegistrationForm(FlaskForm):
         ],
     )
     submit = SubmitField("Create account")
+
+
+class LoginForm(FlaskForm):
+    email = StringField(
+        "Email address",
+        filters=[lambda value: value.strip().lower() if value else value],
+        validators=[DataRequired(), Email(), Length(max=254)],
+    )
+    password = PasswordField(
+        "Password",
+        validators=[DataRequired(), Length(max=128)],
+    )
+    submit = SubmitField("Log in")

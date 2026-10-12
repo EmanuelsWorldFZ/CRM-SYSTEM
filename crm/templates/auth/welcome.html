@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Welcome | Portfolio CRM{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <section class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5 text-center">
+        <h1 class="h3 mb-3">Welcome, {{ current_user.first_name }}</h1>
+        <p class="text-secondary mb-0">
+          You are signed in to your Portfolio CRM account.
+        </p>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

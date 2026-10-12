@@ -4,6 +4,7 @@ from pathlib import Path
 
 import click
 from flask import Flask, redirect, url_for
+from flask_login import current_user
 
 from crm.config import Config
 from crm.extensions import csrf, db, login_manager
@@ -38,6 +39,8 @@ def create_app(test_config: dict | None = None) -> Flask:
 
     @app.get("/")
     def index():
+        if current_user.is_authenticated:
+            return redirect(url_for("auth.welcome"))
         return redirect(url_for("auth.register"))
 
     @app.cli.command("init-db")

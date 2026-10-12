@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Log in | Portfolio CRM{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <section class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-2">Welcome back</h1>
+        <p class="text-secondary mb-4">Log in to your client workspace.</p>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control" ~ (" is-invalid" if form.email.errors else ""), autocomplete="email") }}
+            {% for error in form.email.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="mb-4">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control" ~ (" is-invalid" if form.password.errors else ""), autocomplete="current-password") }}
+            {% for error in form.password.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {{ form.submit(class="btn btn-primary w-100") }}
+        </form>
+        <p class="text-center text-secondary mt-4 mb-0">
+          Need an account? <a href="{{ url_for('auth.register') }}">Create one</a>
+        </p>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
