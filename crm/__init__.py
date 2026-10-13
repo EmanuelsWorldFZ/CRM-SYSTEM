@@ -34,10 +34,12 @@ def create_app(test_config: dict | None = None) -> Flask:
         return db.session.get(User, user_id_int)
 
     from crm.auth import auth_blueprint
+    from crm.api import api_blueprint
     from crm.clients import clients_blueprint
     from crm.dashboard import dashboard_blueprint
 
     app.register_blueprint(auth_blueprint, url_prefix="/auth")
+    app.register_blueprint(api_blueprint, url_prefix="/api/v1")
     app.register_blueprint(clients_blueprint, url_prefix="/clients")
     app.register_blueprint(dashboard_blueprint)
 
