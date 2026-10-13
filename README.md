@@ -13,7 +13,7 @@ grouped with their blueprint. Pytest exercises the app through its test client.
 ```text
 crm/
   auth/          Registration and login/logout
-  clients/       Owner-scoped client management
+  clients/       Owner-scoped client management, search, and filtering
   dashboard/     Authenticated workspace overview
   models/        SQLAlchemy entities
   templates/     Shared and blueprint-specific Jinja templates
@@ -45,13 +45,12 @@ with a later feature.
 1. User registration with validated input, password hashing, and tests (complete).
 2. Login/logout and authenticated session handling (complete).
 3. Dashboard with authenticated account overview (complete).
-4. Client CRUD and ownership enforcement (complete).
+4. Client CRUD, ownership enforcement, search, and company filtering (complete).
 5. Add and view client notes (complete).
-6. Search and filtering.
-7. Admin/User authorization.
-8. Activity logging.
-9. Versioned REST API.
-10. Broader test coverage and production hardening.
+6. Admin/User authorization.
+7. Activity logging.
+8. Versioned REST API.
+9. Broader test coverage and production hardening.
 
 ## Run locally
 

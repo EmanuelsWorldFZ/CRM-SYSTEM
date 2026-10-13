@@ -114,3 +114,94 @@ def test_create_client_rejects_invalid_email(client, app):
 
     assert response.status_code == 200
     assert b"Invalid email address" in response.data
+
+
+def test_client_search_matches_name_company_email_and_phone(app, client):
+    with app.app_context():
+        user = create_user("ada@example.com")
+        matching_clients = [
+            Client(name="Grace Hopper", company="Navy", owner_id=user.id),
+            Client(name="Katherine Johnson", email="katherine@example.com", owner_id=user.id),
+            Client(name="Dorothy Vaughan", phone="555-0142", owner_id=user.id),
+        ]
+        nonmatching_client = Client(name="Alan Turing", company="Bletchley", owner_id=user.id)
+        db.session.add_all(matching_clients + [nonmatching_client])
+        db.session.commit()
+        user_id = user.id
+    login_as(client, user_id)
+
+    for term, expected_name in (
+        ("hopper", b"Grace Hopper"),
+        ("NAVY", b"Grace Hopper"),
+        ("KATHERINE@EXAMPLE.COM", b"Katherine Johnson"),
+        ("555-0142", b"Dorothy Vaughan"),
+    ):
+        response = client.get("/clients/?q={}".format(term))
+        assert response.status_code == 200
+        assert expected_name in response.data
+        assert b"Alan Turing" not in response.data
+
+
+def test_company_filter_and_search_can_be_combined(app, client):
+    with app.app_context():
+        user = create_user("ada@example.com")
+        clients = [
+            Client(name="Grace Hopper", company="Navy", owner_id=user.id),
+            Client(name="Grace Jones", company="Music", owner_id=user.id),
+            Client(name="Katherine Johnson", company="Navy", owner_id=user.id),
+        ]
+        db.session.add_all(clients)
+        db.session.commit()
+        user_id = user.id
+    login_as(client, user_id)
+
+    response = client.get("/clients/?q=grace&company=Navy")
+
+    assert response.status_code == 200
+    assert b"Grace Hopper" in response.data
+    assert b"Grace Jones" not in response.data
+    assert b"Katherine Johnson" not in response.data
+    assert b'value="Navy"' in response.data
+    assert b"selected" in response.data
+
+
+def test_client_search_does_not_expose_other_users_records(app, client):
+    with app.app_context():
+        owner = create_user("owner@example.com")
+        other = create_user("other@example.com", first_name="Katherine")
+        db.session.add_all(
+            [
+                Client(name="Private Match", company="Private Company", owner_id=owner.id),
+                Client(name="Other Company Client", company="Other Company", owner_id=other.id),
+            ]
+        )
+        db.session.commit()
+        other_id = other.id
+    login_as(client, other_id)
+
+    response = client.get("/clients/?q=private")
+
+    assert response.status_code == 200
+    assert b"Private Match" not in response.data
+    assert b"Private Company" not in response.data
+    assert b"No clients found" in response.data
+
+
+def test_search_wildcards_are_treated_as_literal_text(app, client):
+    with app.app_context():
+        user = create_user("ada@example.com")
+        db.session.add_all(
+            [
+                Client(name="100% Ready", owner_id=user.id),
+                Client(name="1000 Ready", owner_id=user.id),
+            ]
+        )
+        db.session.commit()
+        user_id = user.id
+    login_as(client, user_id)
+
+    response = client.get("/clients/?q=100%25")
+
+    assert response.status_code == 200
+    assert b"100% Ready" in response.data
+    assert b"1000 Ready" not in response.data

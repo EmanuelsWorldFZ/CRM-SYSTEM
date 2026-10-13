@@ -1,5 +1,6 @@
-from flask import abort, flash, redirect, render_template, url_for
+from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import or_
 
 from crm.clients import clients_blueprint
 from crm.clients.forms import ClientForm
@@ -23,12 +24,48 @@ def _owned_client_or_404(client_id: int) -> Client:
 @clients_blueprint.get("/")
 @login_required
 def index():
+    search = request.args.get("q", "").strip()
+    company_filter = request.args.get("company", "").strip()
+
+    query = db.select(Client).where(Client.owner_id == current_user.id)
+    if search:
+        escaped_search = (
+            search.replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_")
+        )
+        pattern = "%{}%".format(escaped_search)
+        query = query.where(
+            or_(
+                Client.name.ilike(pattern, escape="\\"),
+                Client.company.ilike(pattern, escape="\\"),
+                Client.email.ilike(pattern, escape="\\"),
+                Client.phone.ilike(pattern, escape="\\"),
+            )
+        )
+    if company_filter:
+        query = query.where(Client.company == company_filter)
+
     clients = db.session.execute(
-        db.select(Client)
-        .where(Client.owner_id == current_user.id)
-        .order_by(Client.name, Client.id)
-    ).scalars()
-    return render_template("clients/index.html", clients=clients)
+        query.order_by(Client.name, Client.id)
+    ).scalars().all()
+    companies = db.session.execute(
+        db.select(Client.company)
+        .where(
+            Client.owner_id == current_user.id,
+            Client.company.is_not(None),
+            Client.company != "",
+        )
+        .distinct()
+        .order_by(Client.company)
+    ).scalars().all()
+    return render_template(
+        "clients/index.html",
+        clients=clients,
+        companies=companies,
+        search=search,
+        company_filter=company_filter,
+    )
 
 
 @clients_blueprint.route("/new", methods=["GET", "POST"])
