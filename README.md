@@ -13,6 +13,7 @@ grouped with their blueprint. Pytest exercises the app through its test client.
 ```text
 crm/
   auth/          Registration and login/logout
+  clients/       Owner-scoped client management
   dashboard/     Authenticated workspace overview
   models/        SQLAlchemy entities
   templates/     Shared and blueprint-specific Jinja templates
@@ -35,15 +36,16 @@ tests/
 
 Clients belong to a user; notes belong to a client and record their author.
 Foreign keys enforce those relationships. Passwords are stored only as
-Werkzeug-generated hashes. The first feature implements the user table only;
-the remaining entities arrive with their respective features.
+Werkzeug-generated hashes. User registration and the owner-scoped client
+records are implemented; notes and activity logs will be added with later
+features.
 
 ## Development roadmap
 
 1. User registration with validated input, password hashing, and tests (complete).
 2. Login/logout and authenticated session handling (complete).
 3. Dashboard with authenticated account overview (complete).
-4. Client CRUD and ownership enforcement.
+4. Client CRUD and ownership enforcement (complete).
 5. Client notes.
 6. Search and filtering.
 7. Admin/User authorization.

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | Portfolio CRM{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-9 col-lg-7">
+    <section class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-2">{{ title }}</h1>
+        <p class="text-secondary mb-4">Keep client contact details in one place.</p>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control" ~ (" is-invalid" if form.name.errors else "")) }}
+            {% for error in form.name.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.company.label(class="form-label") }}
+            {{ form.company(class="form-control" ~ (" is-invalid" if form.company.errors else "")) }}
+            {% for error in form.company.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control" ~ (" is-invalid" if form.email.errors else ""), autocomplete="email") }}
+            {% for error in form.email.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="mb-4">
+            {{ form.phone.label(class="form-label") }}
+            {{ form.phone(class="form-control" ~ (" is-invalid" if form.phone.errors else ""), autocomplete="tel") }}
+            {% for error in form.phone.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="d-flex gap-2">
+            {{ form.submit(class="btn btn-primary") }}
+            <a class="btn btn-outline-secondary"
+               href="{{ url_for('clients.detail', client_id=client.id) if client else url_for('clients.index') }}">
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

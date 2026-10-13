@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }} | Portfolio CRM{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a class="text-decoration-none" href="{{ url_for('clients.index') }}">&larr; All clients</a>
+</div>
+<section class="card border-0 shadow-sm">
+  <div class="card-body p-4 p-md-5">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <p class="text-primary fw-semibold text-uppercase small mb-1">Client</p>
+        <h1 class="h2 mb-1">{{ client.name }}</h1>
+        <p class="text-secondary mb-0">{{ client.company or "Independent contact" }}</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary"
+           href="{{ url_for('clients.edit', client_id=client.id) }}">Edit</a>
+        <form method="post"
+              action="{{ url_for('clients.delete', client_id=client.id) }}"
+              onsubmit="return confirm('Delete this client? This cannot be undone.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-outline-danger" type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+    <div class="row g-4 border-top pt-4">
+      <div class="col-md-6">
+        <div class="small text-secondary mb-1">Email address</div>
+        {% if client.email %}
+          <a href="mailto:{{ client.email }}">{{ client.email }}</a>
+        {% else %}
+          <span>Not provided</span>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        <div class="small text-secondary mb-1">Phone number</div>
+        {% if client.phone %}
+          <a href="tel:{{ client.phone }}">{{ client.phone }}</a>
+        {% else %}
+          <span>Not provided</span>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        <div class="small text-secondary mb-1">Added</div>
+        <span>{{ client.created_at.strftime("%B %d, %Y") }}</span>
+      </div>
+      <div class="col-md-6">
+        <div class="small text-secondary mb-1">Last updated</div>
+        <span>{{ client.updated_at.strftime("%B %d, %Y") }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -36,6 +36,11 @@ class User(UserMixin, db.Model):
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
     )
+    clients = db.relationship(
+        "Client",
+        back_populates="owner",
+        cascade="all, delete-orphan",
+    )
 
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(
