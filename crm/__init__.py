@@ -8,6 +8,7 @@ from flask_login import current_user
 
 from crm.config import Config
 from crm.extensions import csrf, db, login_manager
+from crm.models import User, UserRole
 
 
 def create_app(test_config: dict | None = None) -> Flask:
@@ -23,8 +24,6 @@ def create_app(test_config: dict | None = None) -> Flask:
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
     csrf.init_app(app)
-
-    from crm.models import User
 
     @login_manager.user_loader
     def load_user(user_id: str) -> User | None:
@@ -54,5 +53,24 @@ def create_app(test_config: dict | None = None) -> Flask:
         with app.app_context():
             db.create_all()
         click.echo("Database tables created.")
+
+    @app.cli.command("set-user-role")
+    @click.argument("email")
+    @click.argument(
+        "role",
+        type=click.Choice([role.value for role in UserRole], case_sensitive=False),
+    )
+    def set_user_role_command(email: str, role: str) -> None:
+        """Set an existing user's role from a trusted administrative shell."""
+        normalized_email = email.strip().lower()
+        user = db.session.execute(
+            db.select(User).where(User.email == normalized_email)
+        ).scalar_one_or_none()
+        if user is None:
+            raise click.ClickException("No user found with that email address.")
+
+        user.role = UserRole(role.lower())
+        db.session.commit()
+        click.echo("Updated {} to role {}.".format(user.email, user.role.value))
 
     return app

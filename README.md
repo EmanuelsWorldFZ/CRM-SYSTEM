@@ -36,8 +36,8 @@ tests/
 
 Clients belong to a user; notes belong to a client and record their author.
 Foreign keys enforce those relationships. Passwords are stored only as
-Werkzeug-generated hashes. Registration, login, the dashboard, owner-scoped
-client records, and client notes are implemented. Activity logs will be added
+Werkzeug-generated hashes. Registration, login, the dashboard, role-based
+client access, and client notes are implemented. Activity logs will be added
 with a later feature.
 
 ## Development roadmap
@@ -47,7 +47,7 @@ with a later feature.
 3. Dashboard with authenticated account overview (complete).
 4. Client CRUD, ownership enforcement, search, and company filtering (complete).
 5. Add and view client notes (complete).
-6. Admin/User authorization.
+6. Admin/User authorization for client records (complete).
 7. Activity logging.
 8. Versioned REST API.
 9. Broader test coverage and production hardening.
@@ -73,3 +73,8 @@ flask --app crm:create_app run --debug
 ```
 
 Open `http://127.0.0.1:5000/auth/register`. Run tests with `pytest`.
+
+New registrations receive the `user` role. Assign an administrator from a
+trusted shell with `flask --app crm:create_app set-user-role EMAIL admin`.
+Admins can view, edit, and delete all clients; regular users are limited to
+their own records.

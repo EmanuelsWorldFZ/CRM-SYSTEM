@@ -2,6 +2,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import or_
 
+from crm.auth.permissions import can_manage_client, is_admin
 from crm.clients import clients_blueprint
 from crm.clients.forms import ClientForm
 from crm.clients.note_forms import NoteForm
@@ -10,13 +11,8 @@ from crm.models import Client, Note
 
 
 def _owned_client_or_404(client_id: int) -> Client:
-    client = db.session.execute(
-        db.select(Client).where(
-            Client.id == client_id,
-            Client.owner_id == current_user.id,
-        )
-    ).scalar_one_or_none()
-    if client is None:
+    client = db.session.get(Client, client_id)
+    if client is None or not can_manage_client(current_user, client):
         abort(404)
     return client
 
@@ -27,7 +23,9 @@ def index():
     search = request.args.get("q", "").strip()
     company_filter = request.args.get("company", "").strip()
 
-    query = db.select(Client).where(Client.owner_id == current_user.id)
+    query = db.select(Client)
+    if not is_admin(current_user):
+        query = query.where(Client.owner_id == current_user.id)
     if search:
         escaped_search = (
             search.replace("\\", "\\\\")
@@ -49,15 +47,14 @@ def index():
     clients = db.session.execute(
         query.order_by(Client.name, Client.id)
     ).scalars().all()
+    company_query = db.select(Client.company).where(
+        Client.company.is_not(None),
+        Client.company != "",
+    )
+    if not is_admin(current_user):
+        company_query = company_query.where(Client.owner_id == current_user.id)
     companies = db.session.execute(
-        db.select(Client.company)
-        .where(
-            Client.owner_id == current_user.id,
-            Client.company.is_not(None),
-            Client.company != "",
-        )
-        .distinct()
-        .order_by(Client.company)
+        company_query.distinct().order_by(Client.company)
     ).scalars().all()
     return render_template(
         "clients/index.html",

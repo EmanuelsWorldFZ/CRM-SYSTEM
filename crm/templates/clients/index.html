@@ -5,7 +5,13 @@
   <div>
     <p class="text-primary fw-semibold text-uppercase small mb-1">Relationships</p>
     <h1 class="h2 mb-1">Clients</h1>
-    <p class="text-secondary mb-0">Manage your client contacts.</p>
+    <p class="text-secondary mb-0">
+      {% if current_user.role.value == "admin" %}
+        Manage client contacts across the workspace.
+      {% else %}
+        Manage your client contacts.
+      {% endif %}
+    </p>
   </div>
   <a class="btn btn-primary" href="{{ url_for('clients.create') }}">Add client</a>
 </div>
@@ -47,7 +53,13 @@
     <div class="card-header bg-white border-0 px-4 pt-4">
       <p class="small text-secondary mb-0">
         {{ clients|length }} {{ "client" if clients|length == 1 else "clients" }}
-        {% if search or company_filter %}found{% else %}in your list{% endif %}
+        {% if search or company_filter %}
+          found
+        {% elif current_user.role.value == "admin" %}
+          in the workspace
+        {% else %}
+          in your list
+        {% endif %}
       </p>
     </div>
     <div class="table-responsive">
@@ -58,6 +70,9 @@
             <th scope="col">Company</th>
             <th scope="col">Email</th>
             <th scope="col">Phone</th>
+            {% if current_user.role.value == "admin" %}
+              <th scope="col">Owner</th>
+            {% endif %}
             <th scope="col"><span class="visually-hidden">Actions</span></th>
           </tr>
         </thead>
@@ -73,6 +88,9 @@
               <td>{{ client.company or "—" }}</td>
               <td>{{ client.email or "—" }}</td>
               <td>{{ client.phone or "—" }}</td>
+              {% if current_user.role.value == "admin" %}
+                <td>{{ client.owner.first_name }} {{ client.owner.last_name }}</td>
+              {% endif %}
               <td class="text-end pe-4">
                 <a class="btn btn-sm btn-outline-secondary"
                    href="{{ url_for('clients.edit', client_id=client.id) }}">Edit</a>

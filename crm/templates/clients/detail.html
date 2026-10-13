@@ -48,6 +48,12 @@
         <div class="small text-secondary mb-1">Last updated</div>
         <span>{{ client.updated_at.strftime("%B %d, %Y") }}</span>
       </div>
+      {% if current_user.role.value == "admin" %}
+        <div class="col-md-6">
+          <div class="small text-secondary mb-1">Record owner</div>
+          <span>{{ client.owner.first_name }} {{ client.owner.last_name }}</span>
+        </div>
+      {% endif %}
     </div>
   </div>
 </section>
