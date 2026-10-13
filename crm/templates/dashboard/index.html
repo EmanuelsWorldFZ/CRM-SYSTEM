@@ -52,4 +52,44 @@
     </section>
   </div>
 </div>
+
+<section class="card border-0 shadow-sm mt-4">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h2 class="h5 mb-1">Recent activity</h2>
+        <p class="text-secondary mb-0">
+          {% if user.role.value == "admin" %}
+            Recent changes across the workspace.
+          {% else %}
+            Recent changes to your clients.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+    {% if activity %}
+      <div class="list-group list-group-flush">
+        {% for event in activity %}
+          <div class="list-group-item px-0 d-flex justify-content-between gap-3">
+            <div>
+              <p class="mb-1">{{ event.summary }}</p>
+              <p class="small text-secondary mb-0">
+                {{ event.actor_name }}
+                {% if user.role.value == "admin" %}
+                  &middot; {{ event.client_name }}
+                {% endif %}
+              </p>
+            </div>
+            <time class="small text-secondary text-nowrap"
+                  datetime="{{ event.created_at.isoformat() }}">
+              {{ event.created_at.strftime("%b %d, %H:%M") }}
+            </time>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-secondary mb-0">No activity yet.</p>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

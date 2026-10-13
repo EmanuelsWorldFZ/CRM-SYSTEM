@@ -2,6 +2,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import or_
 
+from crm.activity import log_activity
 from crm.auth.permissions import can_manage_client, is_admin
 from crm.clients import clients_blueprint
 from crm.clients.forms import ClientForm
@@ -78,6 +79,14 @@ def create():
             owner_id=current_user.id,
         )
         db.session.add(client)
+        db.session.flush()
+        log_activity(
+            "client.created",
+            "client",
+            client.id,
+            client,
+            "Added client {}".format(client.name),
+        )
         db.session.commit()
         flash("Client added successfully.", "success")
         return redirect(url_for("clients.index"))
@@ -109,6 +118,14 @@ def add_note(client_id: int):
             author_id=current_user.id,
         )
         db.session.add(note)
+        db.session.flush()
+        log_activity(
+            "note.created",
+            "note",
+            note.id,
+            client,
+            "Added a note to {}".format(client.name),
+        )
         db.session.commit()
         flash("Note added successfully.", "success")
         return redirect(url_for("clients.detail", client_id=client.id))
@@ -127,6 +144,13 @@ def edit(client_id: int):
     form = ClientForm(obj=client)
     if form.validate_on_submit():
         form.populate_obj(client)
+        log_activity(
+            "client.updated",
+            "client",
+            client.id,
+            client,
+            "Updated client {}".format(client.name),
+        )
         db.session.commit()
         flash("Client updated successfully.", "success")
         return redirect(url_for("clients.detail", client_id=client.id))
@@ -143,6 +167,13 @@ def edit(client_id: int):
 @login_required
 def delete(client_id: int):
     client = _owned_client_or_404(client_id)
+    log_activity(
+        "client.deleted",
+        "client",
+        client.id,
+        client,
+        "Deleted client {}".format(client.name),
+    )
     db.session.delete(client)
     db.session.commit()
     flash("Client deleted.", "success")
