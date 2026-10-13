@@ -25,7 +25,7 @@ def _safe_next_url(target: str | None) -> str | None:
 @auth_blueprint.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("auth.welcome"))
+        return redirect(url_for("dashboard.index"))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -39,16 +39,10 @@ def login():
             flash("You are now logged in.", "success")
             return redirect(
                 _safe_next_url(request.args.get("next"))
-                or url_for("auth.welcome")
+                or url_for("dashboard.index")
             )
 
     return render_template("auth/login.html", form=form)
-
-
-@auth_blueprint.get("/welcome")
-@login_required
-def welcome():
-    return render_template("auth/welcome.html")
 
 
 @auth_blueprint.post("/logout")

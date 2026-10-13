@@ -96,7 +96,7 @@ def test_login_authenticates_user_and_uses_safe_next_url(app, client):
     assert response.status_code == 302
     assert response.headers["Location"].endswith("/private/page")
     with client:
-        response = client.get("/auth/welcome")
+        response = client.get("/dashboard")
         assert response.status_code == 200
         assert b"Ada Lovelace" in response.data
 
@@ -135,7 +135,7 @@ def test_login_ignores_external_next_url(app, client):
     )
 
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/auth/welcome")
+    assert response.headers["Location"].endswith("/dashboard")
 
 
 def test_logout_clears_authenticated_session(app, client):
@@ -157,3 +157,49 @@ def test_logout_clears_authenticated_session(app, client):
         assert response.headers["Location"].endswith("/auth/login")
         with client.session_transaction() as session:
             assert "_user_id" not in session
+
+
+def test_dashboard_requires_authentication(client):
+    response = client.get("/dashboard")
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/auth/login?next=%2Fdashboard")
+
+
+def test_dashboard_displays_authenticated_user_details(app, client):
+    with app.app_context():
+        user = User(first_name="Ada", last_name="Lovelace", email="ada@example.com")
+        user.set_password("correct-horse-battery-staple")
+        db.session.add(user)
+        db.session.commit()
+        user_id = user.id
+
+    with client.session_transaction() as session:
+        session["_user_id"] = str(user_id)
+        session["_fresh"] = True
+
+    response = client.get("/dashboard")
+
+    assert response.status_code == 200
+    assert b"Welcome back, Ada" in response.data
+    assert b"ada@example.com" in response.data
+    assert b"User" in response.data
+    assert b"Workspace setup" in response.data
+
+
+def test_root_redirects_to_dashboard_when_authenticated(app, client):
+    with app.app_context():
+        user = User(first_name="Ada", last_name="Lovelace", email="ada@example.com")
+        user.set_password("correct-horse-battery-staple")
+        db.session.add(user)
+        db.session.commit()
+        user_id = user.id
+
+    with client.session_transaction() as session:
+        session["_user_id"] = str(user_id)
+        session["_fresh"] = True
+
+    response = client.get("/")
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/dashboard")

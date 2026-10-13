@@ -21,6 +21,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     db.init_app(app)
     login_manager.init_app(app)
+    login_manager.login_view = "auth.login"
     csrf.init_app(app)
 
     from crm.models import User
@@ -34,14 +35,16 @@ def create_app(test_config: dict | None = None) -> Flask:
         return db.session.get(User, user_id_int)
 
     from crm.auth import auth_blueprint
+    from crm.dashboard import dashboard_blueprint
 
     app.register_blueprint(auth_blueprint, url_prefix="/auth")
+    app.register_blueprint(dashboard_blueprint)
 
     @app.get("/")
     def index():
         if current_user.is_authenticated:
-            return redirect(url_for("auth.welcome"))
-        return redirect(url_for("auth.register"))
+            return redirect(url_for("dashboard.index"))
+        return redirect(url_for("auth.login"))
 
     @app.cli.command("init-db")
     def init_db_command() -> None:
