@@ -36,9 +36,9 @@ tests/
 
 Clients belong to a user; notes belong to a client and record their author.
 Foreign keys enforce those relationships. Passwords are stored only as
-Werkzeug-generated hashes. User registration and the owner-scoped client
-records are implemented; notes and activity logs will be added with later
-features.
+Werkzeug-generated hashes. Registration, login, the dashboard, owner-scoped
+client records, and client notes are implemented. Activity logs will be added
+with a later feature.
 
 ## Development roadmap
 
@@ -46,7 +46,7 @@ features.
 2. Login/logout and authenticated session handling (complete).
 3. Dashboard with authenticated account overview (complete).
 4. Client CRUD and ownership enforcement (complete).
-5. Client notes.
+5. Add and view client notes (complete).
 6. Search and filtering.
 7. Admin/User authorization.
 8. Activity logging.

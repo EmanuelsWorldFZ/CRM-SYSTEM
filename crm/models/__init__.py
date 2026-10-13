@@ -1,4 +1,5 @@
 from crm.models.client import Client
+from crm.models.note import Note
 from crm.models.user import User, UserRole
 
-__all__ = ["Client", "User", "UserRole"]
+__all__ = ["Client", "Note", "User", "UserRole"]

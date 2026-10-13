@@ -41,6 +41,7 @@ class User(UserMixin, db.Model):
         back_populates="owner",
         cascade="all, delete-orphan",
     )
+    notes = db.relationship("Note", back_populates="author")
 
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(

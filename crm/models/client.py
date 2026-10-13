@@ -30,3 +30,9 @@ class Client(db.Model):
     )
 
     owner = db.relationship("User", back_populates="clients")
+    notes = db.relationship(
+        "Note",
+        back_populates="client",
+        cascade="all, delete-orphan",
+        order_by="(Note.created_at.desc(), Note.id.desc())",
+    )

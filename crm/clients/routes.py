@@ -3,8 +3,9 @@ from flask_login import current_user, login_required
 
 from crm.clients import clients_blueprint
 from crm.clients.forms import ClientForm
+from crm.clients.note_forms import NoteForm
 from crm.extensions import db
-from crm.models import Client
+from crm.models import Client, Note
 
 
 def _owned_client_or_404(client_id: int) -> Client:
@@ -54,7 +55,35 @@ def create():
 @login_required
 def detail(client_id: int):
     client = _owned_client_or_404(client_id)
-    return render_template("clients/detail.html", client=client)
+    note_form = NoteForm()
+    return render_template(
+        "clients/detail.html",
+        client=client,
+        note_form=note_form,
+    )
+
+
+@clients_blueprint.post("/<int:client_id>/notes")
+@login_required
+def add_note(client_id: int):
+    client = _owned_client_or_404(client_id)
+    form = NoteForm()
+    if form.validate_on_submit():
+        note = Note(
+            body=form.body.data,
+            client_id=client.id,
+            author_id=current_user.id,
+        )
+        db.session.add(note)
+        db.session.commit()
+        flash("Note added successfully.", "success")
+        return redirect(url_for("clients.detail", client_id=client.id))
+
+    return render_template(
+        "clients/detail.html",
+        client=client,
+        note_form=form,
+    )
 
 
 @clients_blueprint.route("/<int:client_id>/edit", methods=["GET", "POST"])

@@ -51,4 +51,49 @@
     </div>
   </div>
 </section>
+<div class="row g-4 mt-1">
+  <div class="col-lg-7">
+    <section class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h5 mb-3">Notes</h2>
+        {% if client.notes %}
+          <div class="list-group list-group-flush">
+            {% for note in client.notes %}
+              <article class="list-group-item px-0">
+                <p class="mb-2" style="white-space: pre-wrap">{{ note.body }}</p>
+                <p class="small text-secondary mb-0">
+                  {{ note.author.first_name }} {{ note.author.last_name }}
+                  &middot; {{ note.created_at.strftime("%b %d, %Y at %H:%M") }} UTC
+                </p>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-secondary mb-0">No notes yet.</p>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+  <div class="col-lg-5">
+    <section class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h5 mb-3">Add a note</h2>
+        <form method="post"
+              action="{{ url_for('clients.add_note', client_id=client.id) }}"
+              novalidate>
+          {{ note_form.hidden_tag() }}
+          <div class="mb-3">
+            {{ note_form.body.label(class="form-label") }}
+            {{ note_form.body(class="form-control" ~ (" is-invalid" if note_form.body.errors else ""), rows="5", maxlength="5000") }}
+            {% for error in note_form.body.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+            <div class="form-text">Maximum 5,000 characters.</div>
+          </div>
+          {{ note_form.submit(class="btn btn-primary") }}
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
 {% endblock %}
